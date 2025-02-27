@@ -1,0 +1,15 @@
+# /etc/systemd/system/docker-stacks-startup.service
+
+[Unit]
+Description=Start Docker Compose Stacks
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/docker-stacks/start_stacks.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

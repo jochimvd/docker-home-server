@@ -1,0 +1,218 @@
+services:
+  overseerr:
+    container_name: overseerr
+    image: ghcr.io/hotio/overseerr
+    # ports:
+    #   - "5055:5055"
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/overseerr:/config
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.overseerr.entrypoints=websecure
+      - traefik.http.routers.overseerr.rule=Host(`overseerr.vandijck.xyz`)
+      - traefik.http.routers.overseerr.middlewares=default-headers@file
+      - traefik.http.services.overseerr.loadbalancer.server.port=5055
+    networks:
+      - proxy
+      - media
+  doplarr:
+    container_name: doplarr
+    image: ghcr.io/hotio/doplarr
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/doplarr:/config
+    networks:
+      - media
+  radarr:
+    container_name: radarr
+    image: ghcr.io/hotio/radarr
+    #ports:
+    #- "7878:7878"
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/radarr:/config
+      - /mnt/media:/data
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.radarr.entrypoints=websecure
+      - traefik.http.routers.radarr.middlewares=secured@file
+      - traefik.http.services.radarr.loadbalancer.server.port=7878
+    networks:
+      - proxy
+      - media
+  sonarr:
+    container_name: sonarr
+    image: ghcr.io/hotio/sonarr
+    # ports:
+    #   - "8989:8989"
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/sonarr:/config
+      - /mnt/media:/data
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.entrypoints=websecure
+      - traefik.http.routers.sonarr.middlewares=secured@file
+      - traefik.http.services.sonarr.loadbalancer.server.port=8989
+    networks:
+      - proxy
+      - media
+  bazarr:
+    container_name: bazarr
+    image: ghcr.io/hotio/bazarr
+    # ports:
+    #   - "6767:6767"
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/bazarr:/config
+      - /mnt/media:/data
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bazarr.entrypoints=websecure
+      - traefik.http.routers.bazarr.middlewares=secured@file
+      - traefik.http.services.bazarr.loadbalancer.server.port=6767
+    networks:
+      - proxy
+      - media
+  prowlarr:
+    container_name: prowlarr
+    image: ghcr.io/hotio/prowlarr
+    # ports:
+    #   - "9696:9696"
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/prowlarr:/config
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.prowlarr.entrypoints=websecure
+      - traefik.http.routers.prowlarr.middlewares=secured@file
+      - traefik.http.services.prowlarr.loadbalancer.server.port=9696
+    networks:
+      - proxy
+      - media
+  sabnzbd:
+    container_name: sabnzbd
+    image: ghcr.io/hotio/sabnzbd
+    # ports:
+    #   - "8081:8080"
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/sabnzbd:/config
+      - /mnt/media/usenet:/data/usenet
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sabnzbd.entrypoints=websecure
+      - traefik.http.routers.sabnzbd.middlewares=secured@file
+      - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
+    networks:
+      - proxy
+      - media
+  qbittorrent:
+    container_name: qbittorrent
+    image: ghcr.io/hotio/qbittorrent
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+      - VPN_ENABLED=false
+    volumes:
+      - ./config/qbittorrent:/config
+      - /mnt/media/torrents:/data/torrents
+    restart: unless-stopped
+    network_mode: service:gluetun
+  gluetun:
+    container_name: gluetun
+    image: ghcr.io/qdm12/gluetun
+    ports:
+      #   - "8082:8080"
+      - 8118:8118
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
+      - VPN_ENDPOINT_IP=51.159.99.123
+      - VPN_ENDPOINT_PORT=15264
+      - TZ=Europe/Brussels
+    env_file:
+      - .env
+    volumes:
+      - ./config/gluetun:/gluetun
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.qbittorrent.entrypoints=websecure
+      - traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.internal.vandijck.xyz`)
+      - traefik.http.routers.qbittorrent.middlewares=secured@file
+      - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
+    networks:
+      - proxy
+      - media
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:7
+    container_name: recyclarr
+    user: 3001:3000
+    volumes:
+      - ./config/recyclarr:/config
+    environment:
+      - TZ=Europe/Brussels
+    networks:
+      - media
+  autoscan:
+    container_name: autoscan
+    image: ghcr.io/hotio/autoscan
+    # ports:
+    #   - "3030:3030"
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - UMASK=002
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/autoscan:/config
+      - /mnt/media:/data
+    networks:
+      - media
+
+networks:
+  media: null
+  proxy:
+    external: true

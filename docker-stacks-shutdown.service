@@ -1,0 +1,14 @@
+# /etc/systemd/system/docker-stacks-shutdown.service
+
+[Unit]
+Description=Stop Docker Compose Stacks before Shutdown
+Before=shutdown.target reboot.target halt.target
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/docker-stacks/stop_stacks.sh
+
+[Install]
+WantedBy=multi-user.target

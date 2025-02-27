@@ -1,0 +1,87 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - TZ=Europe/Brussels
+    env_file:
+      - .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/traefik.yml:/traefik.yml:ro
+      - ./data/acme.json:/acme.json
+      - ./data/config.yml:/config.yml:ro
+      - ./data/logs:/var/log/traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.middlewares=secured@file"
+      - "traefik.http.routers.traefik.service=api@internal"
+    networks:
+      - proxy
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      - TZ=Europe/Brussels
+      - GID=3000
+      - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux
+    depends_on:
+      - traefik
+    volumes:
+      - ./data/crowdsec/db:/var/lib/crowdsec/data
+      - ./data/crowdsec/config:/etc/crowdsec
+      - ./data/logs:/var/log/traefik:ro
+    networks:
+      - proxy
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  bouncer-traefik:
+    image: fbonalair/traefik-crowdsec-bouncer:latest
+    container_name: bouncer-traefik
+    environment:
+      - CROWDSEC_AGENT_HOST=crowdsec:8080
+      - GIN_MODE=release
+    env_file:
+      - .env
+    depends_on:
+      - crowdsec
+    networks:
+      - proxy
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  traefik-forward-auth:
+    image: thomseddon/traefik-forward-auth:2
+    container_name: traefik-forward-auth
+    environment:
+      - COOKIE_DOMAIN=vandijck.xyz
+      - AUTH_HOST=auth.vandijck.xyz
+    env_file:
+      - .env
+    depends_on:
+      - traefik
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-forward-auth.entrypoints=websecure"
+      - "traefik.http.routers.traefik-forward-auth.rule=Host(`auth.vandijck.xyz`)"
+      - "traefik.http.routers.traefik-forward-auth.middlewares=secured@file"
+      - "traefik.http.services.traefik-forward-auth.loadbalancer.server.port=4181"
+    restart: unless-stopped
+
+networks:
+  proxy:
+    external: true

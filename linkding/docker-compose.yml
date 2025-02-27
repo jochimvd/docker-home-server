@@ -1,0 +1,21 @@
+services:
+  linkding:
+    container_name: "linkding"
+    image: sissbruecker/linkding:latest
+    # ports:
+    #   - "9090:9090"
+    volumes:
+      - "./data:/etc/linkding/data"
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.linkding.entrypoints=websecure
+      - traefik.http.routers.linkding.rule=Host(`linkding.vandijck.xyz`)
+      - traefik.http.routers.linkding.middlewares=default-headers@file
+      - traefik.http.services.linkding.loadbalancer.server.port=9090
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
