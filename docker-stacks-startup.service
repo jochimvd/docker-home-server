@@ -8,6 +8,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+ExecStartPre=/bin/sleep 30
 ExecStart=/opt/docker-stacks/start_stacks.sh
 RemainAfterExit=yes
 
