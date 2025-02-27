@@ -11,4 +11,4 @@ Type=oneshot
 ExecStart=/opt/docker-stacks/stop_stacks.sh
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=shutdown.target reboot.target halt.target
