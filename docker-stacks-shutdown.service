@@ -8,7 +8,9 @@ After=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/opt/docker-stacks/stop_stacks.sh
+ExecStop=/opt/docker-stacks/stop_stacks.sh
+TimeoutStopSec=60
+RemainAfterExit=yes
 
 [Install]
 WantedBy=shutdown.target reboot.target halt.target
