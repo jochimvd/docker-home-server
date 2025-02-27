@@ -24,6 +24,9 @@ services:
       - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.middlewares=secured@file"
       - "traefik.http.routers.traefik.service=api@internal"
+    depends_on:
+      - bouncer-traefik
+      - traefik-forward-auth
     networks:
       - proxy
 
@@ -34,8 +37,6 @@ services:
       - TZ=Europe/Brussels
       - GID=3000
       - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux
-    depends_on:
-      - traefik
     volumes:
       - ./data/crowdsec/db:/var/lib/crowdsec/data
       - ./data/crowdsec/config:/etc/crowdsec
@@ -70,8 +71,6 @@ services:
       - AUTH_HOST=auth.vandijck.xyz
     env_file:
       - .env
-    depends_on:
-      - traefik
     networks:
       - proxy
     labels:
