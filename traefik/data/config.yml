@@ -1,0 +1,110 @@
+http:
+ #region routers 
+  routers:
+    proxmox:
+      entryPoints:
+        - "websecure"
+      rule: "Host(`proxmox.internal.vandijck.xyz`)"
+      middlewares:
+        - secured
+      service: proxmox
+    truenas:
+      entryPoints:
+        - "websecure"
+      rule: "Host(`truenas.internal.vandijck.xyz`)"
+      middlewares:
+        - secured
+      service: truenas
+    pihole:
+      entryPoints:
+        - "websecure"
+      rule: "Host(`pihole.internal.vandijck.xyz`)"
+      middlewares:
+        - secured
+      service: pihole
+    homeassistant:
+      entryPoints:
+        - "websecure"
+      rule: "Host(`homeassistant-leipark.vandijck.xyz`)"
+      middlewares:
+        - default-headers
+      service: homeassistant
+    plex:
+      entryPoints:
+        - "websecure"
+      rule: "Host(`plex.vandijck.xyz`)"
+      middlewares:
+        - default-headers
+      service: plex
+#endregion
+
+#region services
+  services:
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.41.20:8006"
+        passHostHeader: true
+    truenas:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.41.21"
+        passHostHeader: true
+    pihole:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.41.3"
+        passHostHeader: true
+    homeassistant:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.41.24:8123"
+        passHostHeader: true
+    plex:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.41.23:32400"
+        passHostHeader: true
+#endregion
+
+#region middlewares
+  middlewares:
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+
+    default-whitelist:
+      ipWhiteList:
+        sourceRange:
+          #- "10.0.0.0/8"
+        - "192.168.41.0/24"
+        - "172.16.0.0/12"  # docker (mainly for tailscale)
+
+    traefik-forward-auth:
+      forwardauth:
+        address: http://traefik-forward-auth:4181
+        authResponseHeaders: X-Forwarded-User
+
+    secured:
+      chain:
+        middlewares:
+        - default-whitelist
+        - default-headers
+        - traefik-forward-auth
+
+    crowdsec-bouncer:
+      forwardauth:
+        address: http://bouncer-traefik:8080/api/v1/forwardAuth
+        trustForwardHeader: true
+
+#endregion
+

@@ -1,0 +1,59 @@
+api:
+  dashboard: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      middlewares:
+        - crowdsec-bouncer@file
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
+    http:
+      middlewares:
+        - crowdsec-bouncer@file
+      tls:
+        certResolver: cloudflare
+        domains:
+          - main: "vandijck.xyz"
+            sans:
+              - "*.vandijck.xyz"
+          - main: "jvd.me"
+            sans:
+              - "*.jvd.me"
+
+serversTransport:
+  insecureSkipVerify: true
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    defaultRule: "Host(`{{ .ContainerName }}.internal.vandijck.xyz`)"
+    network: proxy
+  file:
+    filename: /config.yml
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: jochim.van.dijck@gmail.com
+      storage: acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+
+log:
+  level: "INFO"
+  filePath: "/var/log/traefik/traefik.log"
+  maxBackups: 3
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  bufferingSize: 100
