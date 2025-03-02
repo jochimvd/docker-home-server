@@ -25,6 +25,7 @@ services:
       - traefik.http.routers.umami.middlewares=default-headers@file
       - traefik.http.services.umami.loadbalancer.server.port=3000
     networks:
+      - umami
       - proxy
 
   db:
@@ -39,7 +40,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - umami
 
 networks:
+  umami:
   proxy:
     external: true
