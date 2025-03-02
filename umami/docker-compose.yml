@@ -29,8 +29,6 @@ services:
 
   db:
     image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: umami
     env_file:
       - .env
     volumes:
