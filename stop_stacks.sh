@@ -5,10 +5,8 @@ if [ ! -f "$config_file" ]; then
   exit 1
 fi
 
-mapfile -t compose_directories < <(tac "$config_file")
-
 # Iterate through the reversed list of compose directories
-for compose_directory in "${compose_directories[@]}"; do
+while IFS= read -r compose_directory; do
   full_compose_directory="/opt/docker-stacks/$compose_directory"
   if [ ! -d "$full_compose_directory" ]; then
     echo "Warning: Directory '$full_compose_directory' not found. Skipping."
@@ -28,6 +26,6 @@ for compose_directory in "${compose_directories[@]}"; do
   
   # Return to the original directory
   popd > /dev/null
-done
+done < <(awk '1' "$config_file" | tac)
 
 echo "All stacks stopped."

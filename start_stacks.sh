@@ -86,6 +86,6 @@ while IFS= read -r compose_directory; do
   # Return to the original directory
   popd > /dev/null
   
-done < "$config_file"
+done < <(awk '1' "$config_file")
 
 echo "All stacks started."
