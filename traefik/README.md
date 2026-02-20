@@ -82,6 +82,18 @@ Check that your custom parser appears in the list and is "enabled,local":
 docker exec crowdsec cscli parsers list
 ```
 
+## 4. Testing your Whitelist (Advanced)
+
+If you want to be 100% sure your whitelist works without waiting for a ban, use `cscli explain`.
+
+Copy a log line from the Traefik access log that _should_ be whitelisted and run:
+
+```bash
+docker exec crowdsec cscli explain --type traefik --log "PASTE_LOG_LINE_HERE"
+```
+
+Look for the `s02-enrich` section in the output. It will show if your custom parser was triggered and if the event was whitelisted.
+
 ---
 
 **Server Note:** The stack is deployed at `/opt/docker-stacks/traefik`. Access via `ssh port`.
