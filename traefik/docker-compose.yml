@@ -36,7 +36,8 @@ services:
     environment:
       - TZ=Europe/Brussels
       - GID=3000
-      - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux crowdsecurity/plex-allowlist crowdsecurity/overseerr-whitelist
+      - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux
+      - PARSERS=crowdsecurity/plex-allowlist crowdsecurity/overseerr-whitelist
     volumes:
       - ./data/crowdsec/db:/var/lib/crowdsec/data
       - ./data/crowdsec/config:/etc/crowdsec
