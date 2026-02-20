@@ -1,17 +1,17 @@
 name: jvdme/plex-custom-whitelist
 description: 'Comprehensive Whitelist for Plex to prevent false positives'
-filter: "evt.Meta.service == 'http' && evt.Parsed.traefik_router_name == 'plex@file'"
+filter: "evt.Meta.service == 'http' && evt.Meta.log_type in ['http_access-log', 'http_error-log'] && evt.Parsed.traefik_router_name == 'plex@file'"
 whitelist:
   reason: 'Plex General False Positive Prevention'
   expression:
-   # Transcoding (Video, Photo, Music) - Allow most common success/not-found/error codes
-   - evt.Meta.http_status in ['200', '206', '403', '404'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/video/:/transcode/' || evt.Meta.http_path startsWith '/photo/:/transcode/' || evt.Meta.http_path startsWith '/music/:/transcode/')
+   # Transcoding (Video, Photo, Music)
+   - evt.Meta.http_status in ['200', '206', '403', '404'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/video/:/transcode' || evt.Meta.http_path startsWith '/photo/:/transcode' || evt.Meta.http_path startsWith '/music/:/transcode')
    
-   # Timelines and Sessions - Frequent heartbeat/status updates
-   - evt.Meta.http_status in ['200', '400'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/:/timeline' || evt.Meta.http_path == '/status/sessions')
+   # Timelines and Sessions
+   - evt.Meta.http_status in ['200', '400'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/:/timeline' || evt.Meta.http_path startsWith '/status/sessions')
    
    # Library Metadata and PlayQueues
-   - evt.Meta.http_status in ['200', '404'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/library/metadata/' || evt.Meta.http_path startsWith '/playQueues/')
+   - evt.Meta.http_status in ['200', '404'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/library/metadata' || evt.Meta.http_path startsWith '/playQueues')
    
    # Logging from Plex Clients
-   - evt.Meta.http_status in ['200', '201', '403'] && evt.Meta.http_verb == 'POST' && evt.Meta.http_path == '/log'
+   - evt.Meta.http_status in ['200', '201', '403'] && evt.Meta.http_verb == 'POST' && evt.Meta.http_path startsWith '/log'

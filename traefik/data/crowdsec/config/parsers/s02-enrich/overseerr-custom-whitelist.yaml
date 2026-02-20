@@ -1,14 +1,14 @@
 name: jvdme/overseerr-custom-whitelist
 description: 'Comprehensive Whitelist for Overseerr to prevent false positives'
-filter: "evt.Meta.service == 'http' && evt.Parsed.traefik_router_name == 'overseerr@docker'"
+filter: "evt.Meta.service == 'http' && evt.Meta.log_type in ['http_access-log', 'http_error-log'] && evt.Parsed.traefik_router_name == 'overseerr@docker'"
 whitelist:
   reason: 'Overseerr General False Positive Prevention'
   expression:
-   # API Endpoints - Allow common success/not-found/forbidden status codes (some APIs return 404/403 legitimately)
-   - evt.Meta.http_status in ['200', '201', '304', '401', '403', '404'] && evt.Meta.http_verb in ['GET', 'POST', 'PUT', 'DELETE'] && evt.Meta.http_path startsWith '/api/v1/'
+   # API Endpoints
+   - evt.Meta.http_status in ['200', '201', '304', '401', '403', '404'] && evt.Meta.http_verb in ['GET', 'POST', 'PUT', 'DELETE'] && evt.Meta.http_path startsWith '/api/v1'
    
-   # Static Assets and Icons (often 404 on missing custom icons)
-   - evt.Meta.http_status in ['200', '304', '404'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/_next/' || evt.Meta.http_path endsWith '.png' || evt.Meta.http_path endsWith '.ico' || evt.Meta.http_path endsWith '.json')
+   # Static Assets and Icons
+   - evt.Meta.http_status in ['200', '304', '404'] && evt.Meta.http_verb == 'GET' && (evt.Meta.http_path startsWith '/_next' || evt.Meta.http_path endsWith '.png' || evt.Meta.http_path endsWith '.ico' || evt.Meta.http_path endsWith '.json')
 
    # Main page and common redirects
    - evt.Meta.http_status in ['200', '301', '302', '307', '403'] && evt.Meta.http_verb == 'GET' && evt.Meta.http_path == '/'
