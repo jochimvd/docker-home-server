@@ -1,3 +1,8 @@
 data/*
 !data/config.yml
 !data/traefik.yml
+!data/crowdsec/
+!data/crowdsec/config/
+!data/crowdsec/config/parsers/
+!data/crowdsec/config/parsers/s02-enrich/
+!data/crowdsec/config/parsers/s02-enrich/*.yaml
