@@ -81,9 +81,10 @@ services:
   profilarr:
     container_name: profilarr
     image: santiagosayshey/profilarr:latest
-    ports:
-      - 6868:6868
+    # ports:
+    #   - 6868:6868
     environment:
+      - AUTH=off
       - PUID=3001
       - PGID=3000
       - TZ=Europe/Brussels
