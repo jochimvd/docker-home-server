@@ -77,6 +77,28 @@ services:
     networks:
       - proxy
       - media
+
+  profilarr:
+    container_name: profilarr
+    image: ghcr.io/dictionarry-hub/profilarr:latest
+    ports:
+      - 6868:6868
+    environment:
+      - PUID=3001
+      - PGID=3000
+      - TZ=Europe/Brussels
+    volumes:
+      - ./config/profilarr:/config
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.profilarr.entrypoints=websecure
+      - traefik.http.routers.profilarr.middlewares=secured@file
+      - traefik.http.services.profilarr.loadbalancer.server.port=6868
+    networks:
+      - proxy
+      - media
+
   bazarr:
     container_name: bazarr
     image: ghcr.io/hotio/bazarr
@@ -99,6 +121,7 @@ services:
     networks:
       - proxy
       - media
+
   prowlarr:
     container_name: prowlarr
     image: ghcr.io/hotio/prowlarr
@@ -120,6 +143,7 @@ services:
     networks:
       - proxy
       - media
+
   sabnzbd:
     container_name: sabnzbd
     image: ghcr.io/hotio/sabnzbd
@@ -142,6 +166,7 @@ services:
     networks:
       - proxy
       - media
+
   qbittorrent:
     container_name: qbittorrent
     image: ghcr.io/hotio/qbittorrent
@@ -156,6 +181,7 @@ services:
       - /mnt/media/torrents:/data/torrents
     restart: unless-stopped
     network_mode: service:gluetun
+
   gluetun:
     container_name: gluetun
     image: ghcr.io/qdm12/gluetun
@@ -186,16 +212,18 @@ services:
     networks:
       - proxy
       - media
-  recyclarr:
-    image: ghcr.io/recyclarr/recyclarr:7
-    container_name: recyclarr
-    user: 3001:3000
-    volumes:
-      - ./config/recyclarr:/config
-    environment:
-      - TZ=Europe/Brussels
-    networks:
-      - media
+
+  # recyclarr:
+  #   image: ghcr.io/recyclarr/recyclarr:7
+  #   container_name: recyclarr
+  #   user: 3001:3000
+  #   volumes:
+  #     - ./config/recyclarr:/config
+  #   environment:
+  #     - TZ=Europe/Brussels
+  #   networks:
+  #     - media
+
   autoscan:
     container_name: autoscan
     image: ghcr.io/hotio/autoscan
