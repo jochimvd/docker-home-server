@@ -80,7 +80,7 @@ services:
 
   profilarr:
     container_name: profilarr
-    image: ghcr.io/dictionarry-hub/profilarr:latest
+    image: santiagosayshey/profilarr:latest
     ports:
       - 6868:6868
     environment:
