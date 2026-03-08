@@ -1,7 +1,7 @@
 services:
-  overseerr:
-    container_name: overseerr
-    image: ghcr.io/hotio/overseerr
+  seerr:
+    container_name: seerr
+    image: ghcr.io/hotio/seerr
     # ports:
     #   - "5055:5055"
     environment:
@@ -10,14 +10,14 @@ services:
       - UMASK=002
       - TZ=Europe/Brussels
     volumes:
-      - ./config/overseerr:/config
+      - ./config/seerr:/config
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.overseerr.entrypoints=websecure
-      - traefik.http.routers.overseerr.rule=Host(`overseerr.vandijck.xyz`)
-      - traefik.http.routers.overseerr.middlewares=default-headers@file
-      - traefik.http.services.overseerr.loadbalancer.server.port=5055
+      - traefik.http.routers.seerr.entrypoints=websecure
+      - traefik.http.routers.seerr.rule=Host(`seerr.vandijck.xyz`)
+      - traefik.http.routers.seerr.middlewares=default-headers@file
+      - traefik.http.services.seerr.loadbalancer.server.port=5055
     networks:
       - proxy
       - media
