@@ -15,7 +15,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.seerr.entrypoints=websecure
-      - traefik.http.routers.seerr.rule=Host(`seerr.vandijck.xyz`)
+      - traefik.http.routers.seerr.rule=Host(`seerr.vandijck.xyz`) || Host(`overseerr.vandijck.xyz`)
       - traefik.http.routers.seerr.middlewares=default-headers@file
       - traefik.http.services.seerr.loadbalancer.server.port=5055
     networks:
