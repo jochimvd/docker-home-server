@@ -1,5 +1,5 @@
 http:
- #region routers 
+  #region routers
   routers:
     proxmox:
       entryPoints:
@@ -36,9 +36,9 @@ http:
       middlewares:
         - default-headers
       service: plex
-#endregion
+  #endregion
 
-#region services
+  #region services
   services:
     proxmox:
       loadBalancer:
@@ -65,9 +65,9 @@ http:
         servers:
           - url: "https://192.168.41.23:32400"
         passHostHeader: true
-#endregion
+  #endregion
 
-#region middlewares
+  #region middlewares
   middlewares:
     default-headers:
       headers:
@@ -86,8 +86,8 @@ http:
       ipWhiteList:
         sourceRange:
           #- "10.0.0.0/8"
-        - "192.168.41.0/24"
-        - "172.16.0.0/12"  # docker (mainly for tailscale)
+          - "192.168.41.0/24"
+          - "172.16.0.0/12" # docker (mainly for tailscale)
 
     traefik-forward-auth:
       forwardauth:
@@ -97,9 +97,9 @@ http:
     secured:
       chain:
         middlewares:
-        - default-whitelist
-        - default-headers
-        - traefik-forward-auth
+          - default-whitelist
+          - default-headers
+          - traefik-forward-auth
 
     crowdsec-bouncer:
       forwardauth:
